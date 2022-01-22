@@ -13,7 +13,7 @@ let llllbody = $.getdata('llllbody')
 
 !(async () => {
     if (typeof $request !== "undefined") {
-
+//V2P重写入口，此处调用你的重写方法
         llllck()
 
     } else {
@@ -50,14 +50,7 @@ let llllbody = $.getdata('llllbody')
                 console.log(`\n\n开始【流量来了${$.index}】`)
 
 
-                //循环运行
-               /* for (let c = 0; c < 200; c++) {
-                    $.index = c + 1
-
-                    await bankuai()//你要执行的版块  
-                    await $.wait(1000)//你要延迟的时间  1000=1秒
-
-                }*/
+	await liuliang()//你要执行的版块  
             }
         }
     }
@@ -91,26 +84,26 @@ function llllck() {
 
 
 //版块
-function bankuai(timeout = 0) {
+function liuliang(timeout = 0) {
     return new Promise((resolve) => {
 
         let url = {
             url: `https://llhb.ah163.net/ah_red_come/app/userSign`,
             headers: JSON.parse(llllhd),
-            body: `"para":"b489f5a9e5a28c719e1bd33cab03ea6e7738ea01fcd93faf280f6db4a28fca032f11f3a7d5bfb673f29824305f72cfdb81fde0ece9a7c537f9a3b455156033b52efdc67f1fe867df6aad41e55c971305"`,
+            body: JSON.parse(llllbody),
         }
         $.post(url, async (err, resp, data) => {
             try {
 
                 data = JSON.parse(data)
 
-                if (data.status ==0) {
-                 console.log(`流量来了签到成功`)
-
-                } else {
-	 console.log(`流量来了签到失败`)
-	
+                if (data.result ==200) { 
+	     console.log(`流量来了签到成功`)
+                } 
+                 else {
+            console.log(`流量来了签到失败`)
                 }
+ 
             } catch (e) {
 
             } finally {
