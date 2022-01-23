@@ -3,13 +3,18 @@ let status;
 
 status = (status = ($.getval("llllstatus") || "1")) > 1 ? `${status}` : "";
 
-const llllurlArr = [], llllhdArr = [], llllbodyArr = [], llllcount = ''
+let llllbody= $.isNode() ? (process.env.llllbody ? process.env.llllbody : "") : ($.getdata('llllbody') ? $.getdata('llllbody') : "")
+let llllbodyArr = []
+let llllbodys = ""
 
-let llllurl = $.getdata('llllurl')
-let llllhd = $.getdata('llllhd')
-let llllbody = $.getdata('llllbody')
+const llllhd={
+    'device-platform': 'android',
+    'Content-Type': 'application/json',
+	'Content-Length': '171',
+    'Host': 'llhb.ah163.net'
+};
 
-
+const llllcount = ''
 
 !(async () => {
     if (typeof $request !== "undefined") {
@@ -17,16 +22,13 @@ let llllbody = $.getdata('llllbody')
         llllck()
 
     } else {
-        llllurlArr.push($.getdata('llllurl'))
-        llllhdArr.push($.getdata('llllhd'))
+        
         llllbodyArr.push($.getdata('llllbody'))
 
         let llllcount = ($.getval('llllcount') || '1');
 
         for (let i = 2; i <= llllcount; i++) {
 
-            llllurlArr.push($.getdata(`llllurl${i}`))
-            llllhdArr.push($.getdata(`llllhd${i}`))
             llllbodyArr.push($.getdata(`llllbody${i}`))
 
         }
@@ -38,12 +40,10 @@ let llllbody = $.getdata('llllbody')
                 8 * 60 * 60 * 1000
             ).toLocaleString()} ===============================================\n`);
 
-        for (let i = 0; i < llllhdArr.length; i++) {
+        for (let i = 0; i < llllbodyArr.length; i++) {
 
-            if (llllhdArr[i]) {
+            if (llllbodyArr[i]) {
 
-                llllurl = llllurlArr[i];
-                llllhd = llllhdArr[i];
                 llllbody = llllbodyArr[i];
 
                 $.index = i + 1;
@@ -63,23 +63,66 @@ let llllbody = $.getdata('llllbody')
 //获取ck
 function llllck() {
     if ($request.url.indexOf("userSign") > -1) {
-        const llllurl = $request.url
-        if (llllurl) $.setdata(llllurl, `llllurl${status}`)
-        $.log(llllurl)
-
-        const llllhd = JSON.stringify($request.headers)
-        if (llllhd) $.setdata(llllhd, `llllhd${status}`)
-        $.log(llllhd)
 
         const llllbody = $request.body
         if (llllbody) $.setdata(llllbody, `llllbody${status}`)
         $.log(llllbody)
 
-        $.msg($.name, "", `流量来了${status}获取headers成功`)
+        $.msg($.name, "", `流量来了${status}获取body成功`)
 
     }
 }
+//多账号
+ if (typeof $request !== "undefined") {
+     llllck()
+     $.done()
+ }
+if (llllbody) {
+    if (llllbody.indexOf("&") == -1) {
+        llllbodyArr.push(llllbody)
+    } else if (llllbody.indexOf("&") > -1) {
+        llllbodys = llllbody.split("&")
+    } else if (process.env.llllbody && process.env.llllbody.indexOf('&') > -1) {
+        llllbodyArr = process.env.llllbody.split('&');
+        console.log(`您选择的是用"&"隔开\n`)
+    }
+} else if($.isNode()){
+    var fs = require("fs");
+    llllbody = fs.readFileSync("llllbody.txt", "utf8");
+    if (llllbody !== `undefined`) {
+        llllbodys = llllbody.split("\n");
+    } else {
+        $.msg($.name, '【提示】请签到以获取body，明天再跑一次脚本测试', '不知道说啥好', {
+            "open-url": "给您劈个叉吧"
+        });
+        $.done()
+    }
+}
+Object.keys(llllbodys).forEach((item) => {
+    if (llllbodys[item] && !llllbodys[item].startsWith("#")) {
+        llllbodyArr.push(llllbodys[item])
+    }
+})
 
+!(async () => {
+
+
+        console.log(`共${llllbodyArr.length}个账号`)
+	        for (let k = 0; k < llllbodyArr.length; k++) {
+           
+            llllbody1 = llllbodyArr[k];
+            console.log(`${llllbody1}`)
+            console.log(`--------账号 ${k+1} 签到任务执行中--------\n`)
+            await liuliang()
+                await $.wait(1000);
+            console.log("\n\n")
+        }
+
+       
+
+    })()
+    .catch((e) => $.logErr(e))
+    .finally(() => $.done())
 
 
 
@@ -88,20 +131,22 @@ function liuliang(timeout = 0) {
     return new Promise((resolve) => {
 
         let url = {
-            url: `https://llhb.ah163.net/ah_red_come/app/userSign`,
-            headers: JSON.parse(llllhd),
-            body: JSON.parse(llllbody),
+            url: 'https://llhb.ah163.net/ah_red_come/app/userSign',
+            headers: llllhd,
+            body: llllbody1,
         }
         $.post(url, async (err, resp, data) => {
             try {
 
-                data = JSON.parse(data)
+              const result = JSON.parse(data)
 
-                if (data.result ==200) { 
+                if (result.success == true) { 
 	     console.log(`流量来了签到成功`)
+$.msg($.name, "", `签到成功`)
                 } 
                  else {
             console.log(`流量来了签到失败`)
+$.msg($.name, "", `签到失败`)
                 }
  
             } catch (e) {
